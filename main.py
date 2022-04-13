@@ -1,9 +1,8 @@
-from data_preparation.load_data import load
+from data_preparation.cleaning import load_and_clean_data
 
 
 def run():
-    train, test = load(path='dataset/train.csv')
-    print(len(test)), print(len(train))
+    load_and_clean_data(path='dataset/train.csv')
 
 
 if __name__ == '__main__':
