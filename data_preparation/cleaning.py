@@ -33,4 +33,7 @@ def load_and_clean_data(path):
 
     train_with_mean = imputation(train, columns, null_columns)
 
+    return train_with_mean
+
+
 
