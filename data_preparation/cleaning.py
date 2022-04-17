@@ -32,5 +32,9 @@ def load_and_clean_data(path):
     train, test = convert_boolean_category(train, test, columns)
 
     train_with_mean = imputation(train, columns, null_columns)
+    imputed_test = imputation(train, columns, null_columns)
+
+    return train_with_mean, imputed_test
+
 
 
