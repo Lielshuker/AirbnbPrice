@@ -1,9 +1,9 @@
 import numpy as np
 from sklearn.impute import KNNImputer, SimpleImputer
-# from sklearn import preprocessing
+from sklearn import preprocessing
 # from sklearn.experimental import enable_iterative_imputer
 # from sklearn.impute import IterativeImputer
-# import pandas as pd
+import pandas as pd
 
 
 # return dict of the data with different imputation methods
@@ -13,11 +13,12 @@ def imputation(data, columns, null_columns):
     data_with_most_frequent = imputing_with_most_frequent(data, null_columns)
     data_with_median_zero = imputing_with_zero(data, columns, null_columns)
     data_with_delete_null = imputing_with_delete_null(data, columns, null_columns)
+    data_with_knn = imputing_with_knn(data, columns)
 
     # todo knn and variance
     data_imputation = [data_with_mean, data_with_median, data_with_most_frequent, data_with_median_zero,
-                       data_with_delete_null]
-    print(data_with_delete_null['review_scores_rating'])
+                       data_with_delete_null, data_with_knn]
+    print(data_with_knn['review_scores_rating'])
     return data_imputation
 
 
@@ -66,27 +67,31 @@ def imputing_with_delete_null(data, columns, null_columns):
     data_with_deleted_null = data.copy()
     data_with_deleted_null = data_with_deleted_null.dropna()
     return data_with_deleted_null
-# # using knn algorithm to imputation
-# def imputing_with_knn(data_csv, table_cols_name):
-#     data_with_numric_column = data_csv.copy()
-#     le = preprocessing.LabelEncoder()
-#     catgory_column_list = data_with_numric_column.select_dtypes(include=['object']).columns.tolist()
-#     for column in catgory_column_list:
-#         data_with_numric_column[column] = le.fit_transform(data_with_numric_column[column])
-#     data_with_knn_value = data_with_numric_column
-#     impute_knn = KNNImputer(n_neighbors=2)
-#     data_with_knn_value = pd.DataFrame(impute_knn.fit_transform(data_with_knn_value),
-#                                        columns=data_with_knn_value.columns)
-#     data_with_knn_value.head(20)
-#     return data_with_knn_value, data_with_numric_column
+
+
+# using knn algorithm to imputation
+def imputing_with_knn(data, columns):
+    data_with_numric_column = data.copy()
+    le = preprocessing.LabelEncoder()
+    catgory_column_list = data_with_numric_column.select_dtypes(include=['object']).columns.tolist()
+    for column in catgory_column_list:
+        data_with_numric_column[column] = le.fit_transform(data_with_numric_column[column])
+    data_with_knn_value = data_with_numric_column
+    impute_knn = KNNImputer(n_neighbors=2)
+    data_with_knn_value = pd.DataFrame(impute_knn.fit_transform(data_with_knn_value),
+                                       columns=data_with_knn_value.columns)
+    data_with_knn_value.head(20)
+    return data_with_knn_value, data_with_numric_column
 #
 #
-# # # instead of Nan value putting covariance
-# def imputing_with_covariance(data_with_numric_column):
-#     data_with_corr_value = data_with_numric_column
-#     impute_it = IterativeImputer()
-#     data_with_corr_value = pd.DataFrame(impute_it.fit_transform(data_with_corr_value),
-#                                         columns=data_with_corr_value.columns)
+# # instead of Nan value putting covariance
+# def imputing_with_covariance(data, columns, null_columns):
+#     data_with_corr_value = data.copy()
+#     for column in null_columns:
+#         if column in columns['numeric_variables']:
+#             impute_it = IterativeImputer()
+#             data_with_corr_value = pd.DataFrame(impute_it.fit_transform(data_with_corr_value),
+#                                                 columns=data_with_corr_value.columns)
 #     data_with_corr_value.head()
 #     return data_with_corr_value
 
