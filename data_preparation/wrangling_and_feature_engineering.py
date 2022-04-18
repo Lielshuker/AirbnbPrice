@@ -1,8 +1,60 @@
 import pandas as pd
+from cleaning import load_and_clean_data
+from datetime import datetime
+import numpy as np
+
+
+def collect_amenities(data):
+    chars_to_remove = '"{}'
+    amenities_set = set()
+    for line in data['amenities']:
+        amenities = line.split(',')
+        for obj in amenities:
+            for char in chars_to_remove:
+                obj = obj.replace(char, "")
+            if "translation missing" not in obj and obj != '':
+                amenities_set.add(obj)
+    return amenities_set
+
+
+def create_amenities_array(amenities, data):
+    amenities_list = list(amenities)
+    amenities_array = []
+    for row in range(0, data.shape[0]):
+        array = np.zeros(shape=(len(amenities)))
+        row_amen = data['amenities'][row].split(',')
+        for amen in row_amen:
+            item = amen.replace('"', '').replace('}', '').replace('{', '')
+            if "translation missing" not in item and item !='':
+                res = amenities_list.index(item)
+                array[res] = 1
+        amenities_array.append(array.tolist())
+
+    amenities_df = pd.DataFrame(amenities_array, columns=amenities_list)
+    return amenities_df
+
+
+# converting amenities column to binary columns and updating columns_dict
+def handle_amenities(data, columns_dict):
+    amenities_set = collect_amenities(data)
+    amenities_array = create_amenities_array(amenities_set, data)
+
+    data = data.drop(['amenities'], axis=1)
+    data = pd.concat([data, amenities_array], axis=1)
+
+    for amenity in amenities_set:
+        columns_dict['binary_variables'].append(amenity)
+
+    return data, columns_dict
 
 
 def randomly_shuffle_training_data(train):
     return train.sample(frac=1)
+
+
+def convert_date_cols_to_datetime(cols_list):
+    for col in cols_list:
+       train[col] = pd.to_datetime(train[col])
 
 
 def col_binning(col, bin_num):
