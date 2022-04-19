@@ -16,8 +16,8 @@ def drop_columns(train, test, columns):
 # covert TRUE, t to True and FALSE, f to False
 def convert_boolean_category(train, test, columns):
     for column in columns['binary_variables']:
-        train[column] = train[column].apply(lambda x: True if x is 'TRUE' or x is 't' else False)
-        test[column] = test[column].apply(lambda x: True if x is 'TRUE' or x is 't' else False)
+        train[column] = train[column].apply(lambda x: True if x == 'TRUE' or x == 't' else False)
+        test[column] = test[column].apply(lambda x: True if x == 'TRUE' or x == 't' else False)
     return train, test
 
 

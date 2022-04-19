@@ -5,7 +5,7 @@ from data_preparation.imputing_methods import imputing_with_delete_null
 
 
 def convert_present_to_float(x):
-    if x is '':
+    if x == '':
         return 0.0
     return float(x.strip('%'))/100
 
