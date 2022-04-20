@@ -1,12 +1,73 @@
 import pandas as pd
+from cleaning import load_and_clean_data
+from datetime import datetime
+import numpy as np
+
+from data_preparation.load_data import convert_present_to_float
+
+
+def collect_amenities(data):
+    chars_to_remove = '"{}'
+    amenities_set = set()
+    for line in data['amenities']:
+        amenities = line.split(',')
+        for obj in amenities:
+            for char in chars_to_remove:
+                obj = obj.replace(char, "")
+            if "translation missing" not in obj and obj != '':
+                amenities_set.add(obj)
+    return amenities_set
+
+
+def create_amenities_array(amenities, data):
+    amenities_list = list(amenities)
+    amenities_array = []
+    for row in range(0, data.shape[0]):
+        array = np.zeros(shape=(len(amenities)))
+        row_amen = data['amenities'][row].split(',')
+        for amen in row_amen:
+            item = amen.replace('"', '').replace('}', '').replace('{', '')
+            if "translation missing" not in item and item !='':
+                res = amenities_list.index(item)
+                array[res] = 1
+        amenities_array.append(array.tolist())
+
+    amenities_df = pd.DataFrame(amenities_array, columns=amenities_list)
+    return amenities_df
+
+
+# converting amenities column to binary columns and updating columns_dict
+def handle_amenities(data, columns_dict):
+    amenities_set = collect_amenities(data)
+    amenities_array = create_amenities_array(amenities_set, data)
+
+    data = data.drop(['amenities'], axis=1)
+    data = pd.concat([data, amenities_array], axis=1)
+
+    for amenity in amenities_set:
+        columns_dict['binary_variables'].append(amenity)
+
+    return data, columns_dict
 
 
 def randomly_shuffle_training_data(train):
     return train.sample(frac=1)
 
 
+def convert_date_cols_to_datetime(data, cols_list):
+    for col in cols_list:
+       data[col] = pd.to_datetime(data[col])
+
+
+def handle_neighbourhood(data):
+    top_neighbourhoods = data['neighbourhood'].value_counts().head(50).keys()
+    for index, row in data.iterrows():
+        if row['neighbourhood'] not in top_neighbourhoods:
+            data.at[index,'neighbourhood'] = 'other'
+    return data
+
+
 def col_binning(col, bin_num):
-    # todo - need this minimum and maximum?
     # define min and max values:
     minval = col.min()
     maxval = col.max()
@@ -21,7 +82,6 @@ def col_binning(col, bin_num):
 
 
 def naive_binning(train, test, columns, bin_num=20):
-    columns['binned_variables'] = []
     for col in columns['numeric_variables']:
         if col != 'log_price':
             train[col+'_binned'] = col_binning(train[col], bin_num)
@@ -73,17 +133,8 @@ def equalize_columns(train, test):
     return train, test
 
 
-# Gil's binning and one hoe encoding full proccess
-def feature_engineering(imputed_train, test):
-    from data_preparation.load_data import column_type
-    columns = None  # todo add dict (need to decide what variables are indeed categorial + add 'binned_variable' key
-    columns = column_type()
-    # imputed_train, imputed_test = load_and_clean_data(path='dataset/train.csv')
-    train = imputed_train['data_with_delete_null']  # delete null
-    # test = imputed_test[4]
-    train = randomly_shuffle_training_data(train)
-    naive_binning(train, test, columns)
-    oh_train, oh_test = one_hot_enc(train, test, columns)
-    oh_train, oh_test = concat_binary_cols(train, test, oh_train, oh_test, columns)
-    oh_train, oh_test = equalize_columns(oh_train, oh_test)
-    return oh_train, oh_test
+if __name__ == '__main__':
+    path='/home/gilor/Documents/msc/ds_workshop/AirbnbPrice/dataset/train.csv'
+    df = pd.read_csv(path, converters={'host_response_rate': convert_present_to_float})
+    data = handle_neighbourhood(df)
+    print('')
