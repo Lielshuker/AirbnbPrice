@@ -3,6 +3,8 @@ from cleaning import load_and_clean_data
 from datetime import datetime
 import numpy as np
 
+from data_preparation.load_data import convert_present_to_float
+
 
 def collect_amenities(data):
     chars_to_remove = '"{}'
@@ -52,9 +54,17 @@ def randomly_shuffle_training_data(train):
     return train.sample(frac=1)
 
 
-def convert_date_cols_to_datetime(cols_list):
+def convert_date_cols_to_datetime(data, cols_list):
     for col in cols_list:
-       train[col] = pd.to_datetime(train[col])
+       data[col] = pd.to_datetime(data[col])
+
+
+def handle_neighbourhood(data):
+    top_neighbourhoods = data['neighbourhood'].value_counts().head(50).keys()
+    for index, row in data.iterrows():
+        if row['neighbourhood'] not in top_neighbourhoods:
+            data.at[index,'neighbourhood'] = 'other'
+    return data
 
 
 def col_binning(col, bin_num):
@@ -121,3 +131,10 @@ def equalize_columns(train, test):
     test = test[train.columns]
 
     return train, test
+
+
+if __name__ == '__main__':
+    path='/home/gilor/Documents/msc/ds_workshop/AirbnbPrice/dataset/train.csv'
+    df = pd.read_csv(path, converters={'host_response_rate': convert_present_to_float})
+    data = handle_neighbourhood(df)
+    print('')
