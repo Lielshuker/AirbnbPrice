@@ -34,12 +34,12 @@ def check_null_values(df):
 
 # loading the dataset and split it to train - 80% and test - 20%
 def load(path):
-    df = pd.read_csv(path, converters={'host_response_rate': convert_present_to_float})
+    # todo cancel 100 rows
+    df = pd.read_csv(path, converters={'host_response_rate': convert_present_to_float}, nrows=10000)
     null_columns = check_null_values(df)
     df['split'] = np.random.randn(df.shape[0], 1)
     # todo
-    msk = np.random.rand(len(df)) <= 1
+    msk = np.random.rand(len(df)) <= 0.8
     train = df[msk]
     test = df[~msk]
-
     return train, test, null_columns

@@ -13,12 +13,13 @@ def imputation(data, columns, null_columns):
     data_with_most_frequent = imputing_with_most_frequent(data, null_columns)
     data_with_median_zero = imputing_with_zero(data, columns, null_columns)
     data_with_delete_null = imputing_with_delete_null(data, columns, null_columns)
-    data_with_knn = imputing_with_knn(data, columns)
+    # data_with_knn = imputing_with_knn(data, columns)
 
     # todo knn and variance
-    data_imputation = [data_with_mean, data_with_median, data_with_most_frequent, data_with_median_zero,
-                       data_with_delete_null, data_with_knn]
-    print(data_with_knn['review_scores_rating'])
+    data_imputation = {'data_with_mean': data_with_mean, 'data_with_median': data_with_median,
+                       'data_with_most_frequent': data_with_most_frequent,
+                       'data_with_median_zero': data_with_median_zero, 'data_with_delete_null': data_with_delete_null}
+    # print(data_with_knn['review_scores_rating'])
     return data_imputation
 
 

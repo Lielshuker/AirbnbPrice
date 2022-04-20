@@ -1,3 +1,5 @@
+import numpy as np
+
 from data_preparation.imputing_methods import imputing_with_mean, imputation
 from data_preparation.load_data import load, column_type
 
@@ -25,16 +27,23 @@ def convert_percent_to_numeric(train, test):
     return train, test
 
 
+def convert_to_float(train, test, columns):
+    for column in columns['numeric_variables']:
+        train[column] = train[column].astype(np.float)
+        test[column] = test[column].astype(np.float)
+    return train, test
+
+
 def load_and_clean_data(path):
     train, test, null_columns = load(path)
     columns = column_type()
     train, test = drop_columns(train, test, columns)
     train, test = convert_boolean_category(train, test, columns)
-
+    train, test = convert_to_float(train, test, columns)
     train_with_mean = imputation(train, columns, null_columns)
-    imputed_test = imputation(train, columns, null_columns)
+    # imputed_test = imputation(train, columns, null_columns)
 
-    return train_with_mean, imputed_test
+    return train_with_mean, test
 
 
 
