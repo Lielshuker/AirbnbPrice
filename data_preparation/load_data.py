@@ -12,11 +12,11 @@ def convert_present_to_float(x):
 def column_type():
     binary_variables = ['cleaning_fee', 'host_has_profile_pic', 'host_identity_verified', 'instant_bookable']
     categorical_variables = ['property_type', 'room_type', 'amenities', 'bed_type', 'cancellation_policy', 'city',
-                             'description', 'first_review', 'host_since', 'last_review', 'neighbourhood']
-                            # name, thumbnail_url
+                             'neighbourhood'] # name, thumbnail_url
     numeric_variables = ['log_price', 'accommodates', 'bathrooms', 'host_response_rate', 'latitude', 'longitude',
-                         'number_of_reviews', 'review_scores_rating', 'bedrooms', 'beds']  # id, zipcode
-    column_to_drop = ['id', 'name', 'thumbnail_url', 'zipcode']
+                         'number_of_reviews', 'review_scores_rating', 'bedrooms', 'beds', 'first_review',
+                         'host_since', 'last_review']  # id, zipcode
+    column_to_drop = ['id', 'name', 'thumbnail_url', 'zipcode', 'description']
 
     columns = {'binary_variables': binary_variables, 'categorical_variables': categorical_variables,
                'numeric_variables': numeric_variables, 'column_to_drop': column_to_drop}
