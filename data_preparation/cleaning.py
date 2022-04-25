@@ -1,7 +1,8 @@
 import numpy as np
+import pandas as pd
 
 from data_preparation.imputing_methods import imputing_with_mean, imputation
-from data_preparation.load_data import load, column_type
+from data_preparation.load_data import load, column_type, load_delete_null
 
 
 # removing unnecessary columns from the dataset
@@ -34,6 +35,12 @@ def convert_to_float(train, test, columns):
     return train, test
 
 
+def convert_date_cols_to_datetime(data, cols_list):
+    for col in cols_list:
+       data[col] = pd.to_datetime(data[col])
+    return data
+
+
 def load_and_clean_data(path):
     train, test, null_columns = load(path)
     columns = column_type()
@@ -46,4 +53,12 @@ def load_and_clean_data(path):
     return train_with_mean, test
 
 
+def clean_data_without_null(path):
+    train, test = load_delete_null(path)
+    columns = column_type()
+    train, test = drop_columns(train, test, columns)
+    train, test = convert_boolean_category(train, test, columns)
+    train, test = convert_to_float(train, test, columns)
 
+
+    return train, test
