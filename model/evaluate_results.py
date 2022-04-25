@@ -36,8 +36,8 @@ def plot_evaluation(model, train_x, train_y, test_x, test_y, prediction_test):
 
     print("Mean Absolute Perc Error (Σ(|y-pred|/y)/n):",
           "{:,.3f}".format(mean_absolute_percentage_error(test_y, prediction_test)))
-    print("Mean Absolute Error (Σ|y-pred|/n):", "{:,.0f}".format(mean_absolute_error(test_y, prediction_test)))
-    print("Root Mean Squared Error (sqrt(Σ(y-pred)^2/n)):", "{:,.0f}".
+    print("Mean Absolute Error (Σ|y-pred|/n):", "{:,.3f}".format(mean_absolute_error(test_y, prediction_test)))
+    print("Root Mean Squared Error (sqrt(Σ(y-pred)^2/n)):", "{:,.3f}".
           format(np.sqrt(mean_squared_error(test_y, prediction_test))))
 
     ## residuals
