@@ -4,7 +4,7 @@ import numpy as np
 from data_preparation.load_data import convert_present_to_float
 
 
-def collect_amenities(data):
+def collect_amenities(data, columns_dict):
     chars_to_remove = '"{}'
     amenities_set = set()
     for line in data['amenities']:
@@ -14,18 +14,19 @@ def collect_amenities(data):
                 obj = obj.replace(char, "")
             if "translation missing" not in obj and obj != '':
                 amenities_set.add(obj)
-    return amenities_set
+    for amenity in amenities_set:
+        columns_dict['binary_variables'].append(amenity)
+    return list(amenities_set)
 
 
-def create_amenities_array(amenities, data):
-    amenities_list = list(amenities)
+def create_amenities_array(amenities_list, data):
     amenities_array = []
     for index, row in data.iterrows():
-        array = np.zeros(shape=(len(amenities)))
+        array = np.zeros(shape=(len(amenities_list)))
         row_amen = data['amenities'][index].split(',')
         for amen in row_amen:
             item = amen.replace('"', '').replace('}', '').replace('{', '')
-            if "translation missing" not in item and item !='':
+            if item in amenities_list:
                 res = amenities_list.index(item)
                 array[res] = 1
         amenities_array.append(array.tolist())
@@ -35,29 +36,38 @@ def create_amenities_array(amenities, data):
 
 
 # converting amenities column to binary columns and updating columns_dict
-def handle_amenities(data, columns_dict):
-    amenities_set = collect_amenities(data)
+def create_amenities_cols(data, amenities_set):
     amenities_array = create_amenities_array(amenities_set, data)
 
     data = data.drop(['amenities'], axis=1)
     data = pd.concat([data, amenities_array], axis=1)
 
-    for amenity in amenities_set:
-        columns_dict['binary_variables'].append(amenity)
+    return data
 
-    return data, columns_dict
+
+def handle_amenities(train, test, columns_dict):
+    amenities_list = collect_amenities(train, columns_dict)
+    train = create_amenities_cols(train, amenities_list)
+    test = create_amenities_cols(test, amenities_list)
+    columns_dict['categorical_variables'].remove('amenities')
+
+    return train, test, columns_dict
 
 
 def randomly_shuffle_training_data(train):
     return train.sample(frac=1)
 
 
-def handle_neighbourhood(data):
-    top_neighbourhoods = data['neighbourhood'].value_counts().head(50).keys()
-    for index, row in data.iterrows():
+def handle_neighbourhood(train, test):
+    top_neighbourhoods = train['neighbourhood'].value_counts().head(50).keys()
+    for index, row in train.iterrows():
         if row['neighbourhood'] not in top_neighbourhoods:
-            data.at[index,'neighbourhood'] = 'other'
-    return data
+            train.at[index,'neighbourhood'] = 'other'
+    for index, row in test.iterrows():
+        if row['neighbourhood'] not in top_neighbourhoods:
+            test.at[index,'neighbourhood'] = 'other'
+
+    return train, test
 
 
 def col_binning(col, bin_num):
@@ -113,6 +123,16 @@ def concat_binary_cols(train, test, oh_train, oh_test, columns):
     return oh_train, oh_test
 
 
+def concat_numeric_cols(train, test, oh_train, oh_test, columns):
+    for col in columns['numeric_variables']:
+        if col != 'log_price':
+            oh_train = pd.concat([oh_train, train[col]], axis=1)
+
+            oh_test = pd.concat([oh_test, test[col]], axis=1)
+
+    return oh_train, oh_test
+
+
 def equalize_columns(train, test):
     add_to_test = list(set(train.columns) - set(test.columns))
     add_to_train = list(set(test.columns) - set(train.columns))
@@ -127,18 +147,11 @@ def equalize_columns(train, test):
 
 
 def feature_engineering(train, test, columns_dict):
-    train = handle_neighbourhood(train)
-    # train, columns_dict = handle_amenities(train, columns_dict)
-    # test, columns_dict = handle_amenities(test, columns_dict)
-    naive_binning(train, test, columns_dict)
+    train, test, columns_dict = handle_amenities(train, test, columns_dict)
+    train, test = handle_neighbourhood(train, test)
     oh_train, oh_test = one_hot_enc(train, test, columns_dict)
-    concat_binary_cols(train, test, oh_train, oh_test, columns_dict)
+    oh_train, oh_test = concat_binary_cols(train, test, oh_train, oh_test, columns_dict)
+    oh_train, oh_test = concat_numeric_cols(train, test, oh_train, oh_test, columns_dict)
     oh_train, oh_test = equalize_columns(oh_train, oh_test)
-
     return oh_train, oh_test
 
-if __name__ == '__main__':
-    path='/home/gilor/Documents/msc/ds_workshop/AirbnbPrice/dataset/train.csv'
-    df = pd.read_csv(path, converters={'host_response_rate': convert_present_to_float})
-    data = handle_neighbourhood(df)
-    print('')
