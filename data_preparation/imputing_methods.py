@@ -45,12 +45,14 @@ def imputing_with_median(data, columns, null_columns):
 
 
 # instead of Nan value putting most frequent value for all variables
-def imputing_with_most_frequent(data, null_columns):
-    data_with_most_frequent_values = data.copy()
+def imputing_with_most_frequent(train, test, null_columns):
+    train_with_most_frequent_values = train.copy()
+    test_with_most_frequent_values = test.copy()
     for column in null_columns:
-        data_with_most_frequent_values[column] = data_with_most_frequent_values[column].\
-            fillna(data_with_most_frequent_values[column].value_counts().index[0])
-    return data_with_most_frequent_values
+        val = train_with_most_frequent_values[column].value_counts().index[0]
+        train_with_most_frequent_values[column] = train_with_most_frequent_values[column].fillna(val)
+        test_with_most_frequent_values[column] = test_with_most_frequent_values[column].fillna(val)
+    return train_with_most_frequent_values, test_with_most_frequent_values
 
 
 # instead of Nan value putting zero values
