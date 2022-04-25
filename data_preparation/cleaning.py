@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from data_preparation.imputing_methods import imputing_with_mean, imputation
+from data_preparation.imputing_methods import imputing_with_mean, imputation, imputing_with_most_frequent
 from data_preparation.load_data import load, column_type, load_delete_null
 
 
@@ -47,10 +47,11 @@ def load_and_clean_data(path):
     train, test = drop_columns(train, test, columns)
     train, test = convert_boolean_category(train, test, columns)
     train, test = convert_to_float(train, test, columns)
-    train_with_mean = imputation(train, columns, null_columns)
+    # train_with_mean = imputation(train, columns, null_columns)
     # imputed_test = imputation(train, columns, null_columns)
+    train, test = imputing_with_most_frequent(train, test, null_columns)
 
-    return train_with_mean, test
+    return train, test
 
 
 def clean_data_without_null(path):
