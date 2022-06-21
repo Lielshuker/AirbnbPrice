@@ -1,0 +1,4 @@
+stopWords
+model/__pycache__
+data_preparation/__pycache__
+.vscode
