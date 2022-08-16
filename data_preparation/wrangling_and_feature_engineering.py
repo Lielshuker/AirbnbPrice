@@ -1,9 +1,5 @@
 import pandas as pd
 import numpy as np
-import shutil
-import requests
-from PIL import Image, ImageStat
-
 
 def collect_amenities(data, columns_dict):
     chars_to_remove = '"{}'
@@ -157,47 +153,5 @@ def feature_engineering(train, test, columns_dict):
     return oh_train, oh_test
 
 
-# calculate brightness of image:
-# this function opens image in current working directory, converts to greyscale,
-# and pulls a float value for brightness by average pixel brightness.
-def get_brightness():
-    img_src = Image.open('img.png').convert('L')
-    img_src.save("img_greyscale.png")  # saving this image to show comparison
-    stat = ImageStat.Stat(img_src)
-    brightness = stat.mean[0]
-    return brightness
 
-
-# downloading the images:
-# checks the image url, if there isn't thumbnail_url - put 0 as default.
-# else creating request to downloading the image and calculating the brightness,
-# then saving it to brightness.csv
-def get_img_from_url(data):
-    bright_list = {'brightness': []}
-    for i in range(len(data)):
-        try:
-            if str(data['thumbnail_url'][i]) == 'nan':
-                data['brightness'] = 0
-                bright_list['brightness'].append(0)
-                continue
-            response = requests.get(data['thumbnail_url'][i], stream=True)
-            with open('img.png', 'wb') as out_file:
-                shutil.copyfileobj(response.raw, out_file)
-            del response
-            brightness = get_brightness()
-            bright_list['brightness'].append(brightness)
-
-            if i % 100 == 0:
-                print("len", len(bright_list['brightness']), "i", i)
-                df = pd.DataFrame(bright_list)
-                df.to_csv('../dataset/brightness.csv')
-        except:
-            bright_list['brightness'].append(0)
-
-    return bright_list
-
-
-# bright_list = get_img_from_url(data)
-# df = pd.DataFrame(bright_list)
-# df.to_csv('../dataset/brightness.csv')
 

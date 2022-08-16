@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from data_preparation.imputing_methods import imputing_with_mean, imputation, imputing_with_most_frequent
+from data_preparation.imputing_methods import imputing_with_most_frequent
 from data_preparation.load_data import load, column_type, load_delete_null
 
 
