@@ -2,7 +2,6 @@ from data_preparation.cleaning import clean_data_without_null, load_and_clean_da
 
 from data_preparation.load_data import column_type
 from data_preparation.wrangling_and_feature_engineering import feature_engineering
-from model.evaluate_results import evaluate_results
 from model.train import train_model
 
 
@@ -17,7 +16,6 @@ def run():
 
 
     model = train_model(train)
-    evaluate_results(model=model, test=test, train=train)
 
 
 if __name__ == '__main__':
