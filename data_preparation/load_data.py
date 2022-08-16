@@ -37,11 +37,9 @@ def check_null_values(df):
 
 # loading the dataset and split it to train - 80% and test - 20%
 def load(path):
-    # todo cancel 100 rows
     df = pd.read_csv(path, converters={'host_response_rate': convert_present_to_float})#, nrows=10000)
     null_columns = check_null_values(df)
     df['split'] = np.random.randn(df.shape[0], 1)
-    # todo
     msk = np.random.rand(len(df)) <= 0.8
     train = df[msk]
     test = df[~msk]
@@ -50,13 +48,11 @@ def load(path):
 
 # loading the dataset, remove rows with null and split it to train - 80% and test - 20%
 def load_delete_null(path):
-    # todo cancel 100 rows
     df = pd.read_csv(path, converters={'host_response_rate': convert_present_to_float})#, nrows=10000)
     null_columns = check_null_values(df)
     columns = column_type()
     df = imputing_with_delete_null(df, columns, null_columns)
     df['split'] = np.random.randn(df.shape[0], 1)
-    # todo
     msk = np.random.rand(len(df)) <= 0.8
     train = df[msk]
     test = df[~msk]
